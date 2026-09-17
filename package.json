@@ -14,8 +14,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "lab2extention.helloWorld",
-        "title": "Hello World"
+        "command": "lab2extention.showGraph",
+        "title": "Show Graph of Your Code"
       }
     ]
   },

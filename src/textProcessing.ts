@@ -1,3 +1,5 @@
+import * as vscode from 'vscode'
+
 class Stack<T> {
     private massive:T[] = [];
 
@@ -26,12 +28,9 @@ class Stack<T> {
     }
 }
 
-// let test_data:[string[], string] = [['#include <iostream>', '','int sum(int a, int b) {', '', '', 'return a + b;', '}', 'int main() {', '', '', 'return 0;', '}'], '0'];
-// processText(test_data);
-
-export function processText(data:[string[], string]) {
+export function processText(data:[string[], string]):Map<string, string[]>|[string[], string] {
     if (data[1] == '1'){
-        return;
+        return data;
     }
 
     const patterns: Map<RegExp, string> = new Map();
@@ -43,11 +42,12 @@ export function processText(data:[string[], string]) {
     patterns.set(/for\s*\(.+\)\s*\{/, 'for');
     patterns.set(/switch\s*\(.+\)\s*\{/, 'switch');
     patterns.set(/.+ .+\(.*\)\s*\{/, 'function/class_method_in');
-    patterns.set(/return\s*.+;/, 'return');
+    patterns.set(/return\s*.+\(\s*\);/, 'return_func');
     patterns.set(/\s*}\s*/, 'closed');
     let markers: Map<string, string[]> = new Map<string, string[]>;
     let brackets:Stack<string> = new Stack<string>;
     let current_struct:Stack<string> = new Stack<string>;
+    let names_of_struct:Stack<string> = new Stack<string>;
 
     for (let i = 0; i < data[0].length; i++) {
         let typeOfStr:string = '';
@@ -59,36 +59,50 @@ export function processText(data:[string[], string]) {
             }
         }
 
-        if (typeOfStr != ''){
-            if (typeOfStr == 'function/class_method_in') {
-                const name = data[0][i].match(/.+ .+\(.*\)\s*\{/)![0].split(' ')[1].split('(')[0];
+        if (typeOfStr == ''){
+            continue;
+        }
 
-                if (markers.size != 0) {
-                    markers.get(current_struct.top())!.push(name);
-                }
+        if (typeOfStr == 'function/class_method_in'){
+            const name = data[0][i].match(/.+ .+\(.*\)\s*\{/)![0].split(' ')[1].split('(')[0];
+
+            if (current_struct.top() == 'class') {
+                markers.get(names_of_struct.top())!.push(`${names_of_struct.top()}::` + name);
+            }
+            else if (current_struct.top() == 'function/class_method_in'){
+                markers.set(names_of_struct.top(), []);
+                markers.get(names_of_struct.top())!.push(name);
             }
 
-            switch (typeOfStr) {
-                case 'function/class_method_in':
-                case 'class_method_out':
-                case 'structure':
-                case 'class':
-                    current_struct.push(typeOfStr);
-                    brackets.push('{');
-                    break;
-                default:
-                    current_struct.pop();
-                    brackets.pop();
-                    break;
+            names_of_struct.push(name);
+        }
+        else if (typeOfStr == 'return_func') {
+            //придумать, как закидывать функции, которые содержат в себе другие функции и при этом сами сидят в других функциях/классах
+        }
+        else if (typeOfStr == 'class'){
+            const name = data[0][i].match(/.+ .+\(.*\)\s*\{/)![0].split(' ')[1].split('{')[0];
+            
+            if (markers.size != 0) {
+                markers.get(current_struct.top())!.push(name)
             }
+
+            names_of_struct.push(name);
+        }    
+
+        switch (typeOfStr) {
+            case 'function/class_method_in':
+            case 'class_method_out':
+            case 'structure':
+            case 'class':
+                current_struct.push(typeOfStr);
+                brackets.push('{');
+                break;
+            default:
+                current_struct.pop();
+                brackets.pop();
+                break;
         }
     }
 
-    let out:string = '';
-
-    for (const [key, value] of markers) {
-        out += `${key} ${value}\n`;
-    }
-
-    return out;
+    return markers;
 }
