@@ -1,5 +1,10 @@
 import * as vscode from 'vscode'
 
+export type ErrorData = [
+    string[],
+    string
+]
+
 function getCode():string[]{
     const editor = vscode.window.activeTextEditor;
 
@@ -22,7 +27,7 @@ function getCode():string[]{
     return [code, '0'];
 }
 
-export function parseCode(code:string[] = getCode()):[string[], string] {
+export function parseCode(code:string[] = getCode()):ErrorData {
     if (code[1] == '1') {
         return [[code[0]], code[1]];
     }

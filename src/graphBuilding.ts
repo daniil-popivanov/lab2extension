@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 import { processText } from './textProcessing.js'
-import { parseCode } from './filework.js'
+import { ErrorData, parseCode } from './filework.js'
+import { MarkedData } from './textProcessing.js'
 
 interface GraphVertex {
     id:number;
@@ -55,9 +56,9 @@ export class WebPanel {
         );
 
         const visUri = this.panel!.webview.asWebviewUri(visPath);
-        let markedData:Map<string, string[]>|[string[], string] = processText(parseCode());
+        let markedData:MarkedData|ErrorData = processText(parseCode());
 
-        if (Array.isArray(markedData)) {
+        if (Array.isArray(markedData[0])) {
             let isFixed:boolean = false;
             let attemp:number = 0;
             const delay = (seconds: number):Promise<void> => new Promise(resolve => setTimeout(resolve, seconds * 1000));
@@ -77,7 +78,7 @@ export class WebPanel {
                 attemp++;
                 markedData = processText(parseCode());
                 
-                if (!Array.isArray(markedData)) {
+                if (!Array.isArray(markedData[0])) {
                     isFixed = true;
                     console.log("Successfully!");
                 }
@@ -124,23 +125,21 @@ export class WebPanel {
         `;
         let vertices:GraphVertex[] = [];
         let edges:GraphEdge[] = [];
-        let vertexCheck:Map<string|string[], number> = new Map<string, number>;
+        let vertexCheck:Map<string, number> = new Map<string, number>;
 
-        for (const [key, value] of markedData) {
-            if (!vertexCheck.has(key)) {
-                vertexCheck.set(key, vertices.length + 1);
-                const vrtx:GraphVertex = {id:vertices.length + 1, label:key};
+        for (const [key, value] of markedData[0]) {
+            if ((markedData as MarkedData)[1].get(key as string) != '' &&!vertexCheck.has((markedData as MarkedData)[1].get(key as string)!)) {
+                vertexCheck.set((markedData as MarkedData)[1].get(key as string)!, vertices.length + 1);
+                const vrtx:GraphVertex = {id:vertices.length + 1, label:(markedData as MarkedData)[1].get(key as string)!};
                 vertices.push(vrtx);
             }
+            
+            vertexCheck.set(key as string, vertices.length + 1);
+            const vrtx:GraphVertex = {id:vertices.length + 1, label:key as string};
+            vertices.push(vrtx);
 
-            for (const cur_value of value){
-                if (!vertexCheck.has(cur_value)) {
-                    vertexCheck.set(cur_value, vertices.length + 1);
-                    const vrtx:GraphVertex = {id:vertices.length + 1, label:cur_value};
-                    vertices.push(vrtx);
-                }
-    
-                const edge:GraphEdge = {from:vertexCheck.get(key)!, to:vertexCheck.get(cur_value)!, arrows:'to'};
+            if ((markedData as MarkedData)[1].get(key as string) != ''){
+                const edge:GraphEdge = {from:vertexCheck.get((markedData as MarkedData)[1].get(key as string)!)!, to:vertexCheck.get(key as string)!, arrows:'to'};
                 edges.push(edge);
             }
         }

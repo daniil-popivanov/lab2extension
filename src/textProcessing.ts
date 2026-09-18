@@ -1,6 +1,6 @@
-import * as vscode from 'vscode'
+import { ErrorData } from "./filework.js";
 
-class Stack<T> {
+export class Stack<T> {
     private massive:T[] = [];
 
     push(value:T):void {
@@ -28,7 +28,12 @@ class Stack<T> {
     }
 }
 
-export function processText(data:[string[], string]):Map<string, string[]>|[string[], string] {
+export type MarkedData = [
+    Map<string, boolean>,
+    Map<string, string>
+]
+
+export function processText(data:ErrorData):MarkedData|ErrorData {
     if (data[1] == '1'){
         return data;
     }
@@ -60,11 +65,12 @@ export function processText(data:[string[], string]):Map<string, string[]>|[stri
     patterns_without_bracket.set(/switch\s*\(.+\)\s*/, 'switch');
     patterns_without_bracket.set(/.+ .+\(.*\)\s*/, 'function/class_method_in');
     
-    let markers: Map<string, string[]> = new Map<string, string[]>;
     let brackets:Stack<string> = new Stack<string>;
     let current_struct:Stack<string> = new Stack<string>;
     let names_of_struct:Stack<string> = new Stack<string>;
-    
+    let relatives:Map<string, string> = new Map<string, string>;
+    let processed:Map<string, boolean> = new Map<string, boolean>;
+
     for (let i = 0; i < data[0].length; i++) {
         let typeOfStr:string = '';
         let isOpen:boolean = false;
@@ -95,39 +101,23 @@ export function processText(data:[string[], string]):Map<string, string[]>|[stri
 
         if (typeOfStr == 'function/class_method_in'){
             const name:string = data[0][i].split(' ').filter(word => /.+\(.*/.test(word))[0].split('(')[0];
+            relatives.set(name + '()', '');
+            processed.set(name + '()', true);
 
-            if (current_struct.isEmpty()){
-                markers.set(name + '()', []);
-            }
-            else{
-                if (current_struct.top() == 'class' || current_struct.top() == 'structure') {
-                    markers.get(names_of_struct.top())!.push(`${names_of_struct.top()}::` + name + '()');
-                }
-                else if (current_struct.top() == 'function/class_method_in'){
-                    if (!markers.has(names_of_struct.top())){
-                        markers.set(names_of_struct.top() + '()', []);
-                    }
-
-                    markers.get(names_of_struct.top())!.push(name + '()');
-                }
+            if (!current_struct.isEmpty()){
+                relatives.set(name + '()', names_of_struct.top());
             }
 
             names_of_struct.push(name + '()');
         }
         else if (typeOfStr == 'return_func') {
             const name:string = data[0][i].split(' ').filter(word => /.+\(.*/.test(word))[0].split('(')[0];
-
-            if (markers.has(names_of_struct.top())) {
-                markers.get(names_of_struct.top())!.push(name + '()');
-            }
-            else {
-                markers.set(names_of_struct.top(), []);
-                markers.get(names_of_struct.top())!.push(name + '()');
-            }
+            relatives.set(name + '()', names_of_struct.top());
+            processed.set(name + '()', true);
         }
         else if (typeOfStr == 'class' || typeOfStr == 'structure'){
             let name:string;
-
+            
             if (/\s*\{\s*/.test(data[0][i])){
                 name = data[0][i].split(' ')[1];
             }
@@ -135,23 +125,22 @@ export function processText(data:[string[], string]):Map<string, string[]>|[stri
                 name = data[0][i].split(' ')[1].split('{')[0];
             }
             
-            if (!current_struct.isEmpty() && current_struct.top() == 'class') {
-                markers.get(names_of_struct.top())!.push(name);
+            name = typeOfStr + ' ' + name;
+            processed.set(name, true);
+            relatives.set(name, '');
+            let numtop:number = 1;
+    
+            if (!names_of_struct.isEmpty()){
+                relatives.set(name, names_of_struct.top());
             }
 
-            markers.set(name, []);
             names_of_struct.push(name);
         }
         else if (typeOfStr == 'class_method_out') {
             const name:string = data[0][i].split(' ').filter(word => /.+::.+\(.*/.test(word))[0].split('(')[0];
             const class_name:string = name.split('::')[0];
-
-            if (!markers.has(class_name)){
-                markers.set(class_name, []);
-            }
-            
-            markers.get(class_name)!.push(name + '()');
-            names_of_struct.push(name);
+            processed.set(class_name + '::' + name, true);
+            relatives.set(class_name + '::' + name, class_name);
         }
 
         switch (typeOfStr) {
@@ -207,5 +196,5 @@ export function processText(data:[string[], string]):Map<string, string[]>|[stri
         return [["Error, something gone wrong! Brackets is not dual!"], "1"];
     }
 
-    return markers;
+    return [processed, relatives];
 }
