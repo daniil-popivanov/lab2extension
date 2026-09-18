@@ -3,6 +3,11 @@
   "displayName": "lab2extention",
   "description": "",
   "version": "0.0.1",
+  "type": "module",
+  "dependencies": {
+    "vis-data": "^7.1.9",
+    "vis-network": "^10.0.0"
+  },
   "engines": {
     "vscode": "^1.137.0"
   },
