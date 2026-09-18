@@ -1,71 +1,49 @@
-# lab2extention README
+# Lab2 Extension
 
-This is the README for your extension "lab2extention". After writing up a brief description, we recommend including the following sections.
+Расширение для Visual Studio Code, которое анализирует открытый файл C++ и строит граф его структуры.
 
-## Features
+Расширение определяет:
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- классы;
+- структуры;
+- функции;
+- методы классов;
+- рекурсивные вызовы функций;
+- вложенность элементов;
+- связи между классами, методами и функциями.
 
-For example if there is an image subfolder under your extension project workspace:
+Для визуализации графа используется библиотека `vis-network`.
 
-\!\[feature X\]\(images/feature-x.png\)
+## Возможности
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+- Анализ активного файла C++.
+- Проверка наличия открытого редактора.
+- Проверка расширения файла `.cpp`.
+- Проверка файла на пустое содержимое.
+- Поиск классов и структур.
+- Поиск функций и методов.
+- Определение родительских элементов.
+- Построение рёбер между вершинами графа.
+- Отображение графа в отдельной Webview-панели VS Code.
+- Повторная попытка анализа файла при обнаружении ошибки скобок.
+- Запуск построения графа через команду VS Code.
+- Запуск построения графа с помощью горячих клавиш.
 
-## Requirements
+## Требования
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- Visual Studio Code версии `1.137.0` или новее
+- Node.js
+- npm
+- TypeScript
+- Файл с исходным кодом на C++ с расширением `.cpp`
 
-## Extension Settings
+## Использование
+Для построения графа достаточно нажать горячие клавиши `ctrl+\ ctrl+g` или `ctrl+shift+p` и использовать комманду `Show Graph of Your Code`
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+## Установка проекта
 
-For example:
+Клонируйте проект и перейдите в его директорию:
 
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+```bash
+git clone <https://github.com/daniil-popivanov/lab2extension.git>
+cd lab2extention
