@@ -125,9 +125,9 @@ export function processText(data:ErrorData):MarkedData|ErrorData {
         else if (typeOfStr == 'return_func') {
             const name:string = data[0][i].split(' ').filter(word => /.+\(.*/.test(word))[0].split('(')[0];
 
-            if (processed.has(name + '()')) {
-                continue;
-            }
+            // if (processed.has(name + '()')) {
+            //     continue;
+            // }
 
             if (names_of_struct.top() == name + '()' && names_of_struct.secondtop() != undefined) {
                 relatives.set(name + '()', names_of_struct.secondtop() + '+' + names_of_struct.top());
