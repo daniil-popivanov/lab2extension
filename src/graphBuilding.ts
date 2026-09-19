@@ -128,20 +128,48 @@ export class WebPanel {
         let vertexCheck:Map<string, number> = new Map<string, number>;
 
         for (const [key, value] of markedData[0]) {
-            if ((markedData as MarkedData)[1].get(key as string) != '' &&!vertexCheck.has((markedData as MarkedData)[1].get(key as string)!)) {
-                vertexCheck.set((markedData as MarkedData)[1].get(key as string)!, vertices.length + 1);
-                const vrtx:GraphVertex = {id:vertices.length + 1, label:(markedData as MarkedData)[1].get(key as string)!};
+            if (!vertexCheck.has(key as string)){
+                vertexCheck.set(key as string, vertices.length + 1);
+                const vrtx:GraphVertex = {id:vertices.length + 1, label:key as string};
                 vertices.push(vrtx);
             }
             
-            vertexCheck.set(key as string, vertices.length + 1);
-            const vrtx:GraphVertex = {id:vertices.length + 1, label:key as string};
-            vertices.push(vrtx);
-
-            if ((markedData as MarkedData)[1].get(key as string) != ''){
+            if ((markedData as MarkedData)[1].get(key as string) == '') {
+                continue;
+            }
+            
+            if (/.+\+.+/.test((markedData as MarkedData)[1].get(key as string)!)) {
+                const relatives:string[] = (markedData as MarkedData)[1].get(key as string)!.split('+');
+                
+                if (!vertexCheck.has(relatives[0])) {
+                    vertexCheck.set(relatives[0], vertices.length + 1);
+                    const vrtx:GraphVertex = {id:vertices.length + 1, label:relatives[0]};
+                    vertices.push(vrtx);
+                }
+                
+                const firstEdge:GraphEdge = {from:vertexCheck.get(relatives[0])!, to:vertexCheck.get(key as string)!, arrows:'to'};
+                edges.push(firstEdge);
+                
+                if (!vertexCheck.has(relatives[1])) {
+                    vertexCheck.set(relatives[1], vertices.length + 1);
+                    const vrtx:GraphVertex = {id:vertices.length + 1, label:relatives[1]};
+                    vertices.push(vrtx);
+                }
+                
+                const secondEdge:GraphEdge = {from:vertexCheck.get(relatives[1])!, to:vertexCheck.get(key as string)!, arrows:'to'};
+                edges.push(secondEdge);
+            }
+            else {
+                if (!vertexCheck.has((markedData as MarkedData)[1].get(key as string)!)) {
+                    vertexCheck.set((markedData as MarkedData)[1].get(key as string)!, vertices.length + 1);
+                    const vrtx:GraphVertex = {id:vertices.length + 1, label:(markedData as MarkedData)[1].get(key as string)!};
+                    vertices.push(vrtx);
+                }
+                
                 const edge:GraphEdge = {from:vertexCheck.get((markedData as MarkedData)[1].get(key as string)!)!, to:vertexCheck.get(key as string)!, arrows:'to'};
                 edges.push(edge);
             }
+            
         }
         
         htmlCode += `
@@ -158,7 +186,7 @@ export class WebPanel {
                     { nodes, edges: networkEdges },
                     {
                         edges: {
-                            color: '#5780afc5',
+                            color: '#3159bdc5',
                             width: 2
                         },
                         physics: {
