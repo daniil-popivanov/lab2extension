@@ -26,6 +26,14 @@ export class Stack<T> {
     size():number {
         return this.massive.length;
     }
+
+    secondtop():T|undefined {
+        if (this.massive.length - 2 >= 0) {
+            return this.massive[this.massive.length - 2];
+        }
+
+        return undefined;
+    }
 }
 
 export type MarkedData = [
@@ -50,8 +58,8 @@ export function processText(data:ErrorData):MarkedData|ErrorData {
     patterns.set(/switch\s*\(.+\)\s*\{/, 'switch');
     patterns.set(/return\s*.+\(.*\);/, 'return_func');
     patterns.set(/.+ .+\(.*\)\s*\{/, 'function/class_method_in');
-    patterns.set(/\s*}\s*/, 'closed');
-    patterns.set(/\s*\{\s*/, 'open');
+    patterns.set(/^\s*\}\s*/, 'closed');
+    patterns.set(/^\s*\{\s*/, 'open');
     
     const patterns_without_bracket: Map<RegExp, string> = new Map();
     patterns_without_bracket.set(/\bstruct\b .+\s*/, 'structure');
@@ -72,6 +80,10 @@ export function processText(data:ErrorData):MarkedData|ErrorData {
     let processed:Map<string, boolean> = new Map<string, boolean>;
 
     for (let i = 0; i < data[0].length; i++) {
+        if (i == 74){
+            console.log('1');
+        }
+
         let typeOfStr:string = '';
         let isOpen:boolean = false;
         
@@ -112,7 +124,14 @@ export function processText(data:ErrorData):MarkedData|ErrorData {
         }
         else if (typeOfStr == 'return_func') {
             const name:string = data[0][i].split(' ').filter(word => /.+\(.*/.test(word))[0].split('(')[0];
-            relatives.set(name + '()', names_of_struct.top());
+
+            if (names_of_struct.top() == name + '()' && names_of_struct.secondtop() != undefined) {
+                relatives.set(name + '()', names_of_struct.secondtop() + '+' + names_of_struct.top());
+            }
+            else{
+                relatives.set(name + '()', names_of_struct.top());
+            }
+            
             processed.set(name + '()', true);
         }
         else if (typeOfStr == 'class' || typeOfStr == 'structure'){
