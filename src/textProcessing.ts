@@ -1,6 +1,6 @@
 import { ErrorData } from "./filework.js";
 
-export class Stack<T> {
+export class Stack<T> { //нужен для удобной работы с зависимостями
     private massive:T[] = [];
 
     push(value:T):void {
@@ -36,12 +36,16 @@ export class Stack<T> {
     }
 }
 
-export type MarkedData = [
+export type MarkedData = [ //тип для маркированных данных
     Map<string, boolean>,
     Map<string, string>
 ]
 
 export function processText(data:ErrorData):MarkedData|ErrorData {
+    /*
+    функция принимает на вход код или ошибку data и возвращает размеченный код, либо ошибку
+    */
+
     if (data[1] == '1'){
         return data;
     }
@@ -56,7 +60,7 @@ export function processText(data:ErrorData):MarkedData|ErrorData {
     patterns.set(/while\s*\(.+\)\s*\{/, 'while');
     patterns.set(/for\s*\(.+\)\s*\{/, 'for');
     patterns.set(/switch\s*\(.+\)\s*\{/, 'switch');
-    patterns.set(/return\s*.+\(.*\);/, 'return_func');
+    patterns.set(/return\s*\w+\(.*\);/, 'return_func');
     patterns.set(/.+ .+\(.*\)\s*\{/, 'function/class_method_in');
     patterns.set(/^\s*\}\s*/, 'closed');
     patterns.set(/^\s*\{\s*/, 'open');
@@ -121,6 +125,10 @@ export function processText(data:ErrorData):MarkedData|ErrorData {
         else if (typeOfStr == 'return_func') {
             const name:string = data[0][i].split(' ').filter(word => /.+\(.*/.test(word))[0].split('(')[0];
 
+            if (processed.has(name + '()')) {
+                continue;
+            }
+
             if (names_of_struct.top() == name + '()' && names_of_struct.secondtop() != undefined) {
                 relatives.set(name + '()', names_of_struct.secondtop() + '+' + names_of_struct.top());
             }
@@ -154,8 +162,8 @@ export function processText(data:ErrorData):MarkedData|ErrorData {
         else if (typeOfStr == 'class_method_out') {
             const name:string = data[0][i].split(' ').filter(word => /.+::.+\(.*/.test(word))[0].split('(')[0];
             const class_name:string = name.split('::')[0];
-            processed.set(class_name + '::' + name, true);
-            relatives.set(class_name + '::' + name, class_name);
+            processed.set(name, true);
+            relatives.set(name, 'class ' + class_name);
         }
 
         switch (typeOfStr) {

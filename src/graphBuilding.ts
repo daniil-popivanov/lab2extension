@@ -3,25 +3,25 @@ import { processText } from './textProcessing.js'
 import { ErrorData, parseCode } from './filework.js'
 import { MarkedData } from './textProcessing.js'
 
-interface GraphVertex {
+interface GraphVertex { //интерфейс для парса вершин в формат нужный для vis
     id:number;
     label:string|string[];
 }
 
-interface GraphEdge {
+interface GraphEdge { //интерфейс для парса рёбер в формат нужный для vis
     from:number;
     to:number;
     arrows:string;
 }
 
-export class WebPanel {
+export class WebPanel { //класс веб-панели, реализующий всю логику построения графа
     private panel:vscode.WebviewPanel|undefined;
 
     constructor(
         private readonly context: vscode.ExtensionContext
     ) {}
 
-    connectWebview():void {
+    connectWebview():void { //подключает webview панель
         this.panel = vscode.window.createWebviewPanel(
             'graphOfCode',
             'Graph',
@@ -44,6 +44,13 @@ export class WebPanel {
     }
 
     async makeGraph(): Promise<void> {
+        /*
+        Метод класса, отвечающий за построение графа.
+        
+        Внутри себя вызывает парс текста и его обработку, далее работает с размеченными данными, преобразуя их
+        в данные для vis, который строит граф в webview.
+        */
+
         if (!this.panel){
             this.connectWebview();
         }
@@ -194,7 +201,6 @@ export class WebPanel {
                         }
                     }
                 );
-                console.log(typeof vis);
             </script>
         </body>
         </html>

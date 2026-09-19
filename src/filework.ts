@@ -1,11 +1,11 @@
 import * as vscode from 'vscode'
 
-export type ErrorData = [
+export type ErrorData = [ //тип ошибок
     string[],
     string
 ]
 
-function getCode():string[]{
+function getCode():string[]{ //считывает код с открытого окна vs code из файла с расширением .cpp
     const editor = vscode.window.activeTextEditor;
 
     if (!editor){
@@ -27,7 +27,7 @@ function getCode():string[]{
     return [code, '0'];
 }
 
-export function parseCode(code:string[] = getCode()):ErrorData {
+export function parseCode(code:string[] = getCode()):ErrorData { //разбивает код на строки для дальнейшей обработки
     if (code[1] == '1') {
         return [[code[0]], code[1]];
     }

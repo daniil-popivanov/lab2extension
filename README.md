@@ -47,3 +47,9 @@
 ```bash
 git clone <https://github.com/daniil-popivanov/lab2extension.git>
 cd lab2extention
+```
+
+## Выполнил работу
+
+Попыванов Даниил Максимович, m3104
+isu:558276
