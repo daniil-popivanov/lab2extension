@@ -80,10 +80,6 @@ export function processText(data:ErrorData):MarkedData|ErrorData {
     let processed:Map<string, boolean> = new Map<string, boolean>;
 
     for (let i = 0; i < data[0].length; i++) {
-        if (i == 74){
-            console.log('1');
-        }
-
         let typeOfStr:string = '';
         let isOpen:boolean = false;
         
