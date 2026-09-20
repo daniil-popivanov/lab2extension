@@ -45,8 +45,8 @@
 Клонируйте проект и перейдите в его директорию:
 
 ```bash
-git clone <https://github.com/daniil-popivanov/lab2extension.git>
-cd lab2extention
+git clone https://github.com/daniil-popivanov/lab2extension.git
+cd lab2extension
 ```
 
 ## Выполнил работу
