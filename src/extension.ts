@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { WebPanel } from './graphBuilding.js'
 
-export function activate(context: vscode.ExtensionContext) {	//Запускает исполнение плагина
+export function activate(context: vscode.ExtensionContext) {	// Запускает исполнение плагина
 	const disposable = vscode.commands.registerCommand('lab2extention.showGraph', () => {
 		const panel:WebPanel = new WebPanel(context);
 		panel.makeGraph();
@@ -10,4 +10,4 @@ export function activate(context: vscode.ExtensionContext) {	//Запускае�
 	context.subscriptions.push(disposable);
 }
 
-export function deactivate() {}	// Декативирует плагин
+export function deactivate() {}	// Деактивирует плагин.

@@ -1,6 +1,6 @@
 import { ErrorData } from "./filework.js";
 
-export class Stack<T> { //нужен для удобной работы с зависимостями
+export class Stack<T> { // Структура Stack, позволяющая удобно работать с предками функций.
     private massive:T[] = [];
 
     push(value:T):void {
@@ -36,14 +36,22 @@ export class Stack<T> { //нужен для удобной работы с за�
     }
 }
 
-export type MarkedData = [ //тип для маркированных данных
+export type MarkedData = [ // Тип для маркированных данных.
     Map<string, boolean>,
     Map<string, string>
 ]
 
 export function processText(data:ErrorData):MarkedData|ErrorData {
     /*
-    функция принимает на вход код или ошибку data и возвращает размеченный код, либо ошибку
+        Маркирует текст кода.
+
+            Параметры:
+                data (ErrorData): Значение ошибки из предыдущих функий, либо текст кода.
+
+            Возвращаемое значение:
+                [processed, relatives] (MarkedData): Хеш-таблица с обработанными объектами и хеш-таблица с родителями каждого обработанного элемента.
+                или
+                data (ErrorData): Значение ошибки.
     */
 
     if (data[1] == '1'){
@@ -124,10 +132,6 @@ export function processText(data:ErrorData):MarkedData|ErrorData {
         }
         else if (typeOfStr == 'return_func') {
             const name:string = data[0][i].split(' ').filter(word => /.+\(.*/.test(word))[0].split('(')[0];
-
-            // if (processed.has(name + '()')) {
-            //     continue;
-            // }
 
             if (names_of_struct.top() == name + '()' && names_of_struct.secondtop() != undefined) {
                 relatives.set(name + '()', names_of_struct.secondtop() + '+' + names_of_struct.top());
