@@ -68,7 +68,7 @@ export function processText(data:ErrorData):MarkedData|ErrorData {
     patterns.set(/while\s*\(.+\)\s*\{/, 'while');
     patterns.set(/for\s*\(.+\)\s*\{/, 'for');
     patterns.set(/switch\s*\(.+\)\s*\{/, 'switch');
-    patterns.set(/return\s*\w+\(.*\);/, 'return_func');
+    patterns.set(/return\s*(\w+\s+)*\w+\(.*\);/, 'return_func');
     patterns.set(/.+ .+\(.*\)\s*\{/, 'function/class_method_in');
     patterns.set(/^\s*\}\s*/, 'closed');
     patterns.set(/^\s*\{\s*/, 'open');
@@ -135,12 +135,8 @@ export function processText(data:ErrorData):MarkedData|ErrorData {
 
             if (names_of_struct.top() == name + '()' && names_of_struct.secondtop() != undefined) {
                 relatives.set(name + '()', names_of_struct.secondtop() + '+' + names_of_struct.top());
+                processed.set(name + '()', true);
             }
-            else{
-                relatives.set(name + '()', names_of_struct.top());
-            }
-            
-            processed.set(name + '()', true);
         }
         else if (typeOfStr == 'class' || typeOfStr == 'structure'){
             let name:string;
